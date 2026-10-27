@@ -101,7 +101,7 @@ export function createGate({ sources, lang = 'en' }) {
       evidence = parseEvidence(buf.slice(0, m.index));
       source = evidence ? findSource(evidence, sources) : null;
       if (!source) return refuse();
-      held = buf.slice(m.index + m[0].length);
+      held = buf.slice(m.index + m[0].length).trimStart();
       state = 'verify';
       return '';
     },
@@ -110,7 +110,7 @@ export function createGate({ sources, lang = 'en' }) {
       if (state !== 'verify') return '';
       if (!relevant) return refuse();
       state = 'pass';
-      const out = held;
+      const out = held.trimStart(); // models often emit the space after "REPLY:" as its own later token
       held = '';
       return out;
     },

@@ -348,7 +348,12 @@ $('#clearChat').onclick = () => { state.history = []; $('#chat').replaceChildren
 
 function metaRow(text, stats, sources) {
   const row = h('div', { class: 'meta' });
-  if (stats.firstTokenMs != null) row.append(h('span', { title: 'Time to first word / generation speed, measured on your machine' }, `${(stats.firstTokenMs / 1000).toFixed(1)}s to first word · ${stats.estimated ? '~' : ''}${stats.tokensPerSec} tok/s`));
+  if (stats.firstTokenMs != null) {
+    // Speed is only meaningful for a real generation, not a 5-token "EVIDENCE: NONE".
+    const speed = stats.gate !== 'refuse' && stats.outputTokens >= 15 ? ` · ${stats.estimated ? '~' : ''}${stats.tokensPerSec} tok/s` : '';
+    const check = stats.verifyMs ? `, of which ${(stats.verifyMs / 1000).toFixed(1)}s checking the memory fits` : '';
+    row.append(h('span', { title: `Measured on your machine${check}. Token counts are estimates.` }, `${(stats.firstTokenMs / 1000).toFixed(1)}s to first word${speed}`));
+  }
   const n = sources.ids.length;
   const parts = [n && `${n} memor${n === 1 ? 'y' : 'ies'}`, sources.facts && 'the profile'].filter(Boolean);
   row.append(h('span', {}, parts.length ? `read ${parts.join(' + ')}` : 'nothing written yet'));

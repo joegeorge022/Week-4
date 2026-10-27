@@ -213,8 +213,9 @@ test('gate refuses when the quote is real but the relevance check says it does n
 
 test('gate holds reply text until the relevance check resolves, then releases it intact', () => {
   const g = createGate({ sources, lang: 'en' });
-  assert.equal(g.feed('EVIDENCE: "walked to Mass"\nREPLY: I walked you to '), '');
+  assert.equal(g.feed('EVIDENCE: "walked to Mass"\nREPLY:'), '');
   assert.equal(g.state, 'verify');
+  assert.equal(g.feed(' I walked you to '), '');  // the space after "REPLY:" arrives as its own later token
   assert.equal(g.feed('Mass every Sunday.'), ''); // held while verifying
   assert.equal(g.resolve(true), 'I walked you to Mass every Sunday.');
   assert.equal(g.feed(' More.'), ' More.');         // then flows straight through
