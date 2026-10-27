@@ -1,0 +1,51 @@
+# Render Blueprint: the web app plus a *private* Ollama service running Gemma.
+# The model host is never exposed to the internet; only the PIN-protected app is.
+# Note: CPU inference on Render is slow. Use gemma3:1b here, or point
+# OLLAMA_BASE_URL at a GPU host (e.g. a DigitalOcean GPU Droplet) instead.
+services:
+  - type: web
+    name: ofrenda
+    runtime: node
+    plan: starter
+    buildCommand: npm ci --omit=dev
+    startCommand: node server/index.js
+    healthCheckPath: /api/health
+    disk:
+      name: altar
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: OFRENDA_DATA_DIR
+        value: /var/data
+      - key: OFRENDA_MODEL
+        value: gemma3:1b
+      - key: OFRENDA_PIN          # the shared "word" that unlocks the altar
+        generateValue: true
+      - key: OLLAMA_HOSTPORT
+        fromService:
+          type: pserv
+          name: ofrenda-ollama
+          property: hostport
+      # Optional partners: fill these in the Render dashboard.
+      - key: MONGODB_URI
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+
+  - type: pserv
+    name: ofrenda-ollama
+    runtime: docker
+    plan: standard
+    dockerfilePath: ./deploy/ollama.Dockerfile
+    dockerContext: .
+    disk:
+      name: models
+      mountPath: /root/.ollama
+      sizeGB: 10
+    envVars:
+      - key: OFRENDA_MODEL
+        value: gemma3:1b

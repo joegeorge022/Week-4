@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ofrenda · a ghost that only knows what you tell it</title>
+  <meta name="description" content="A local-first memory altar powered by an open-weight Gemma model. Your stories never leave your machine.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕯️</text></svg>">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="papel" id="papel" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="brand">
+      <h1>Ofrenda</h1>
+      <p>a ghost that only knows what you tell it</p>
+    </div>
+    <div class="badges" id="badges" aria-live="polite"></div>
+  </header>
+
+  <!-- PIN lock (only shown when OFRENDA_PIN is set on the server) -->
+  <section id="lock" class="lock" hidden>
+    <form id="lockForm" class="card">
+      <h2>The altar is locked</h2>
+      <label>Say the word
+        <input id="pin" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="primary">Enter</button>
+      <p class="err" id="lockErr" role="alert"></p>
+    </form>
+  </section>
+
+  <main id="app" hidden>
+    <aside class="people card">
+      <h2>Remembered</h2>
+      <ul id="peopleList"></ul>
+      <button id="addPerson" class="primary wide">🕯 Light a candle for someone</button>
+      <details class="data">
+        <summary>Your data</summary>
+        <p class="muted">Everything lives in <span id="storeKind">a file</span> you control.</p>
+        <button id="exportBtn" class="ghostbtn">Download everything (JSON)</button>
+        <button id="wipeBtn" class="ghostbtn danger">Erase everything</button>
+        <div id="statsBox" class="muted small"></div>
+      </details>
+    </aside>
+
+    <section class="stage">
+      <div id="empty" class="card empty">
+        <h2>Welcome 🌼</h2>
+        <p>Ofrenda keeps the stories of the people you miss, and lets a small open-weight model on <em>your own computer</em> echo them back.</p>
+        <p>It will never invent a memory. If it doesn't know, it will tell you, and invite you to teach it.</p>
+        <button id="addPerson2" class="primary">🕯 Light your first candle</button>
+      </div>
+
+      <div id="person" hidden>
+        <div class="altar" id="altar"></div>
+
+        <nav class="tabs" role="tablist">
+          <button role="tab" data-tab="memories" aria-selected="true">Recuerdos</button>
+          <button role="tab" data-tab="talk">Habla</button>
+          <button role="tab" data-tab="letter">Carta</button>
+        </nav>
+
+        <!-- Memories -->
+        <section class="card tab" id="tab-memories">
+          <form id="memForm">
+            <label for="memText">Tell a story about <span class="pname"></span></label>
+            <textarea id="memText" rows="4" maxlength="4000" placeholder="She sang boleros while the masa rested. Every December the whole street smelled of tamales…" required></textarea>
+            <div class="row">
+              <button class="primary">Keep this memory</button>
+              <button type="button" id="recBtn" class="ghostbtn" hidden>🎙 Record a story</button>
+              <span id="recStatus" class="muted small" aria-live="polite"></span>
+            </div>
+          </form>
+          <ul id="memList" class="memlist"></ul>
+        </section>
+
+        <!-- Talk -->
+        <section class="card tab" id="tab-talk" hidden>
+          <div class="notice">An echo made only from what you wrote, not <span class="pname"></span>. It will say so when it doesn't know.</div>
+          <div class="row between">
+            <label class="inline">Voice of the echo
+              <select id="mode">
+                <option value="echo">Echo (first person)</option>
+                <option value="keeper">Memory keeper (third person)</option>
+              </select>
+            </label>
+            <button id="clearChat" class="ghostbtn">Clear conversation</button>
+          </div>
+          <div id="chat" class="chat" aria-live="polite"></div>
+          <form id="chatForm" class="row">
+            <input id="chatInput" autocomplete="off" maxlength="2000" placeholder="Ask about a story, a song, a recipe…" required>
+            <button class="primary" id="sendBtn">Send</button>
+            <button type="button" id="stopBtn" class="ghostbtn" hidden>Stop</button>
+          </form>
+        </section>
+
+        <!-- Letter -->
+        <section class="card tab" id="tab-letter" hidden>
+          <div class="row">
+            <label class="inline">Form
+              <select id="style">
+                <option value="letter">Letter for the altar</option>
+                <option value="calaverita">Calaverita (playful verse)</option>
+              </select>
+            </label>
+            <label class="inline">Language
+              <select id="lang"><option value="en">English</option><option value="es">Español</option></select>
+            </label>
+            <button id="writeBtn" class="primary">✍ Write it</button>
+          </div>
+          <article id="letterOut" class="letter" hidden></article>
+          <div class="row" id="letterActions" hidden>
+            <button id="speakLetter" class="ghostbtn">🔊 Read aloud</button>
+            <button id="keepLetter" class="ghostbtn">Keep as a memory</button>
+            <button id="copyLetter" class="ghostbtn">Copy</button>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="personDlg">
+    <form id="personForm" method="dialog">
+      <h2 id="dlgTitle">Light a candle</h2>
+      <label>Name <input name="name" required maxlength="80" placeholder="Abuela Rosa"></label>
+      <label>Who were they to you? <input name="relation" maxlength="60" placeholder="grandmother"></label>
+      <label>Years <input name="years" maxlength="30" placeholder="1941 – 2019"></label>
+      <label>Favorite foods <small>(comma separated)</small> <input name="foods" placeholder="tamales, atole, pan dulce"></label>
+      <label>Favorite songs <small>(comma separated)</small> <input name="songs" placeholder="Cielito Lindo, Sabor a mí"></label>
+      <label>Photo <small>(stays on your machine)</small> <input type="file" id="photoIn" accept="image/*"></label>
+      <div class="row end">
+        <button type="button" id="dlgCancel" class="ghostbtn">Cancel</button>
+        <button type="button" id="dlgDelete" class="ghostbtn danger" hidden>Remove</button>
+        <button class="primary" id="dlgSave">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="foot">
+    <span>Open weights. Open source. Your stories stay yours.</span>
+    <span class="muted">Made for the “Ghost in the Machine” challenge · 🌼 Día de los Muertos</span>
+  </footer>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

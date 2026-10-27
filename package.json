@@ -1,0 +1,21 @@
+{
+  "name": "ofrenda",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A local-first, open-weight memory altar. Gemma runs on your machine; your stories never leave it.",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@mastra/core": "^1.79.0",
+    "@sentry/node": "^11.9.0",
+    "mongodb": "^7.7.0",
+    "zod": "^4.6.7"
+  }
+}
