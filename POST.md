@@ -61,7 +61,7 @@ The 1B model is more than twice as fast and refuses far more often, but it never
 - **BM25 retrieval, no vector DB.** A family has dozens of stories, so almost all of them fit in the context window. The ghost gets everything that fits, ordered by relevance, which also lets a Spanish question reach a story written in English.
 - **Storage** is one atomic JSON file by default, or MongoDB Atlas if `MONGODB_URI` is set.
 - **Safety defaults:** loopback-only, Host/Origin checks against DNS-rebinding, optional signed-cookie PIN with rate limiting, typed confirmation before erasing anything.
-- **24 unit tests** plus the eval above. A bug the tests caught early was my context-budget function ignoring newlines, which would have silently truncated a long story.
+- **25 unit tests** plus the eval above. A bug the tests caught early was my context-budget function ignoring newlines, which would have silently truncated a long story.
 
 Optional integrations, all off by default, are in the repo: ElevenLabs (narration, plus recording an oral-history story), Sentry agent tracing (timings only, never the text of a memory), MongoDB Atlas, and a Render blueprint. **I have not run the ElevenLabs path with a real key, deployed the Render blueprint, or confirmed that Sentry events arrive**, so I'm not claiming them as working. I left out other partner technologies that wouldn't have made the project better.
 

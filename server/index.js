@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config, isLocalModel } from './config.js';
 import { openStore } from './store.js';
-import { chatWithGhost, writeRemembrance, modelStatus } from './agent.js';
+import { chatWithGhost, writeRemembrance, modelStatus, warmModel } from './agent.js';
 import { initTelemetry, summary, captureError, tracingEnabled } from './telemetry.js';
 import { speak, transcribe, voiceEnabled } from './voice.js';
 import { isAuthed, safeEqual, sessionToken, checkRequestOrigin, makeLimiter } from './security.js';
@@ -281,6 +281,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.log(`   voice   : ${voiceEnabled() ? 'elevenlabs (cloud)' : 'browser speech (local)'}`);
     if (!st.reachable) console.log(`\n   ⚠ Ollama not reachable. Start it with: ollama serve`);
     else if (!st.installed) console.log(`\n   ⚠ Model missing. Run: ollama pull ${config.model}`);
+    else warmModel(); // fire and forget: the first question is then not a cold start
   });
 
   const shutdown = async () => {

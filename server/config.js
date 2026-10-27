@@ -2,6 +2,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+// Load ./.env if it exists (Node >= 20.12, no dependency). Variables that are already set in the
+// real environment win, so Render / Docker settings are never overridden by a stray file.
+try {
+  process.loadEnvFile(path.join(root, '.env'));
+} catch (err) {
+  if (err?.code !== 'ENOENT') console.warn(`[ofrenda] could not read .env: ${err.message}`);
+}
+
 const env = process.env;
 
 export const config = {

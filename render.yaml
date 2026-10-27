@@ -1,11 +1,15 @@
 # Render Blueprint: the web app plus a *private* Ollama service running Gemma.
 # The model host is never exposed to the internet; only the PIN-protected app is.
-# Note: CPU inference on Render is slow. Use gemma3:1b here, or point
-# OLLAMA_BASE_URL at a GPU host (e.g. a DigitalOcean GPU Droplet) instead.
+#
+# Read SETUP.md ("Deploy to Render") before using this. Two things to know:
+#  * Both services need a paid Render plan (a private service and a persistent disk are not free).
+#  * CPU inference is slow. This file uses gemma3:1b so it fits and answers in a reasonable time.
+#    For better answers, point OLLAMA_BASE_URL at a GPU host instead and delete the pserv below.
 services:
   - type: web
     name: ofrenda
     runtime: node
+    region: oregon            # must match the Ollama service so they can talk privately
     plan: starter
     buildCommand: npm ci --omit=dev
     startCommand: node server/index.js
@@ -15,20 +19,22 @@ services:
       mountPath: /var/data
       sizeGB: 1
     envVars:
+      - key: NODE_VERSION
+        value: "22"
       - key: HOST
         value: 0.0.0.0
       - key: OFRENDA_DATA_DIR
         value: /var/data
       - key: OFRENDA_MODEL
         value: gemma3:1b
-      - key: OFRENDA_PIN          # the shared "word" that unlocks the altar
+      - key: OFRENDA_PIN          # the shared "word" that unlocks the altar; Render generates it
         generateValue: true
-      - key: OLLAMA_HOSTPORT
+      - key: OLLAMA_HOSTPORT      # filled in automatically from the private service below
         fromService:
           type: pserv
           name: ofrenda-ollama
           property: hostport
-      # Optional partners: fill these in the Render dashboard.
+      # Optional partners: Render will ask for these when you create the Blueprint. Leave blank to skip.
       - key: MONGODB_URI
         sync: false
       - key: SENTRY_DSN
@@ -39,6 +45,7 @@ services:
   - type: pserv
     name: ofrenda-ollama
     runtime: docker
+    region: oregon
     plan: standard
     dockerfilePath: ./deploy/ollama.Dockerfile
     dockerContext: .
@@ -47,5 +54,5 @@ services:
       mountPath: /root/.ollama
       sizeGB: 10
     envVars:
-      - key: OFRENDA_MODEL
+      - key: OFRENDA_MODEL        # which model the container pulls on first boot
         value: gemma3:1b

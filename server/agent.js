@@ -201,6 +201,23 @@ export function friendlyError(err) {
 }
 
 /** Is Ollama up, and is our model pulled? Used by the UI's status badge. */
+/**
+ * Ask Ollama to load the model into memory now (an empty /api/generate loads without generating),
+ * so the first real question isn't spent waiting on a cold start. Best effort; never throws.
+ */
+export async function warmModel() {
+  try {
+    await fetch(`${config.ollamaBase}/api/generate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ model: config.model, keep_alive: '30m' }),
+      signal: AbortSignal.timeout(180_000),
+    });
+  } catch {
+    /* Ollama may be starting or the model missing; the first real request will report it clearly */
+  }
+}
+
 export async function modelStatus() {
   try {
     const r = await fetch(`${config.ollamaBase}/api/tags`, { signal: AbortSignal.timeout(2500) });

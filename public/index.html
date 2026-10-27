@@ -2,145 +2,250 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0714">
   <title>Ofrenda · a ghost that only knows what you tell it</title>
   <meta name="description" content="A local-first memory altar powered by an open-weight Gemma model. Your stories never leave your machine.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕯️</text></svg>">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div class="papel" id="papel" aria-hidden="true"></div>
+  <!-- icon sprite (stroke icons, 24x24) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="gPetalA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd166"/><stop offset="1" stop-color="#f77f00"/></linearGradient>
+      <linearGradient id="gPetalB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb703"/><stop offset="1" stop-color="#e85d04"/></linearGradient>
+      <radialGradient id="gHeart"><stop offset="0" stop-color="#7c2d12"/><stop offset="1" stop-color="#c2410c"/></radialGradient>
+    </defs>
+    <symbol id="flor" viewBox="-50 -50 100 100"></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1M12 18v4"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14zM20 17v4H6.5A2.5 2.5 0 0 1 4 18.5"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></symbol>
+    <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.7-4 3-9 3s-9-1.3-9-3M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M18 10h-1.3A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+    <symbol id="i-food" viewBox="0 0 24 24"><path d="M3 2v7a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6a2 2 0 0 0 2 2h3zm0 0v7"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 2.7S5 10 5 14.5a7 7 0 0 0 14 0C19 10 12 2.7 12 2.7z"/></symbol>
+    <symbol id="i-eraser" viewBox="0 0 24 24"><path d="m7 21-4.3-4.3a1 1 0 0 1 0-1.4l9.6-9.6a1 1 0 0 1 1.4 0l5.6 5.6a1 1 0 0 1 0 1.4L13 21M22 21H7M5 11l9 9"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+  </svg>
 
-  <header class="top">
-    <div class="brand">
-      <h1>Ofrenda</h1>
-      <p>a ghost that only knows what you tell it</p>
+  <!-- ambient background -->
+  <div class="bg" aria-hidden="true">
+    <span class="glow g1"></span><span class="glow g2"></span><span class="glow g3"></span>
+    <div class="petals" id="petals"></div>
+  </div>
+
+  <header class="bar">
+    <a class="logo" href="/" aria-label="Ofrenda home">
+      <span class="flame-mark" aria-hidden="true"></span>
+      <span class="logo-text"><b>Ofrenda</b><i>a ghost that only knows what you tell it</i></span>
+    </a>
+    <div class="bar-right">
+      <div class="chips" id="badges" aria-live="polite"></div>
+      <details class="menu" id="menu" hidden>
+        <summary class="btn ghost sm" aria-label="Your data">
+          <svg class="ic"><use href="#i-db"/></svg><span class="hide-sm">Your data</span><svg class="ic chev"><use href="#i-chevron"/></svg>
+        </summary>
+        <div class="menu-pop">
+          <p class="muted small">Everything lives in <b id="storeKind">a file on this machine</b>. You own it.</p>
+          <button id="exportBtn" class="menu-item"><svg class="ic"><use href="#i-download"/></svg>Download everything (JSON)</button>
+          <button id="wipeBtn" class="menu-item danger"><svg class="ic"><use href="#i-eraser"/></svg>Erase everything</button>
+          <div id="statsBox" class="stats small muted"></div>
+        </div>
+      </details>
     </div>
-    <div class="badges" id="badges" aria-live="polite"></div>
   </header>
 
-  <!-- PIN lock (only shown when OFRENDA_PIN is set on the server) -->
+  <!-- PIN lock (only when OFRENDA_PIN is set on the server) -->
   <section id="lock" class="lock" hidden>
-    <form id="lockForm" class="card">
-      <h2>The altar is locked</h2>
-      <label>Say the word
-        <input id="pin" type="password" autocomplete="current-password" required>
-      </label>
-      <button class="primary">Enter</button>
+    <form id="lockForm" class="glass lock-card">
+      <div class="lock-icon"><svg class="ic xl"><use href="#i-lock"/></svg></div>
+      <h2>This altar is locked</h2>
+      <p class="muted">Say the word to come in.</p>
+      <input id="pin" type="password" autocomplete="current-password" placeholder="Passphrase" aria-label="Passphrase" required>
+      <button class="btn primary block">Enter</button>
       <p class="err" id="lockErr" role="alert"></p>
     </form>
   </section>
 
   <main id="app" hidden>
-    <aside class="people card">
-      <h2>Remembered</h2>
-      <ul id="peopleList"></ul>
-      <button id="addPerson" class="primary wide">🕯 Light a candle for someone</button>
-      <details class="data">
-        <summary>Your data</summary>
-        <p class="muted">Everything lives in <span id="storeKind">a file</span> you control.</p>
-        <button id="exportBtn" class="ghostbtn">Download everything (JSON)</button>
-        <button id="wipeBtn" class="ghostbtn danger">Erase everything</button>
-        <div id="statsBox" class="muted small"></div>
-      </details>
+    <aside class="rail">
+      <div class="rail-head"><h2>Remembered</h2></div>
+      <ul id="peopleList" class="people"></ul>
+      <button id="addPerson" class="btn add"><svg class="ic"><use href="#i-plus"/></svg><span>Light a candle</span></button>
     </aside>
 
     <section class="stage">
-      <div id="empty" class="card empty">
-        <h2>Welcome 🌼</h2>
-        <p>Ofrenda keeps the stories of the people you miss, and lets a small open-weight model on <em>your own computer</em> echo them back.</p>
-        <p>It will never invent a memory. If it doesn't know, it will tell you, and invite you to teach it.</p>
-        <button id="addPerson2" class="primary">🕯 Light your first candle</button>
+      <!-- welcome -->
+      <div id="empty" class="hero glass">
+        <div class="hero-art" aria-hidden="true">
+          <span class="hero-candle"></span><span class="hero-candle tall"></span><span class="hero-candle"></span>
+        </div>
+        <h1>Welcome. Who are we remembering?</h1>
+        <p>Ofrenda keeps the stories of the people you miss, then lets a small open-weight model on <em id="whereModel">your own computer</em> echo them back.</p>
+        <ul class="promises">
+          <li><svg class="ic"><use href="#i-shield"/></svg>Never invents a memory. If it doesn't know, it says so.</li>
+          <li><svg class="ic"><use href="#i-lock"/></svg><span id="promiseStay">Your stories stay on this machine.</span></li>
+          <li id="promiseOffline"><svg class="ic"><use href="#i-sparkles"/></svg>Works with the Wi-Fi off.</li>
+        </ul>
+        <div class="hero-actions">
+          <button id="addPerson2" class="btn primary lg"><svg class="ic"><use href="#i-plus"/></svg>Light your first candle</button>
+          <button id="sampleBtn" class="btn ghost lg">Try a sample altar</button>
+        </div>
       </div>
 
       <div id="person" hidden>
-        <div class="altar" id="altar"></div>
+        <section class="altar" id="altar" aria-label="Altar"></section>
 
-        <nav class="tabs" role="tablist">
-          <button role="tab" data-tab="memories" aria-selected="true">Recuerdos</button>
-          <button role="tab" data-tab="talk">Habla</button>
-          <button role="tab" data-tab="letter">Carta</button>
+        <nav class="tabs" role="tablist" aria-label="Sections">
+          <button role="tab" id="t-memories" aria-controls="tab-memories" data-tab="memories" aria-selected="true">
+            <svg class="ic"><use href="#i-book"/></svg><span><b>Memories</b><i>Recuerdos</i></span>
+          </button>
+          <button role="tab" id="t-talk" aria-controls="tab-talk" data-tab="talk" aria-selected="false" tabindex="-1">
+            <svg class="ic"><use href="#i-chat"/></svg><span><b>Talk</b><i>Habla</i></span>
+          </button>
+          <button role="tab" id="t-letter" aria-controls="tab-letter" data-tab="letter" aria-selected="false" tabindex="-1">
+            <svg class="ic"><use href="#i-mail"/></svg><span><b>Letter</b><i>Carta</i></span>
+          </button>
         </nav>
 
         <!-- Memories -->
-        <section class="card tab" id="tab-memories">
-          <form id="memForm">
-            <label for="memText">Tell a story about <span class="pname"></span></label>
-            <textarea id="memText" rows="4" maxlength="4000" placeholder="She sang boleros while the masa rested. Every December the whole street smelled of tamales…" required></textarea>
-            <div class="row">
-              <button class="primary">Keep this memory</button>
-              <button type="button" id="recBtn" class="ghostbtn" hidden>🎙 Record a story</button>
+        <section class="panel" id="tab-memories" role="tabpanel" aria-labelledby="t-memories">
+          <form id="memForm" class="glass composer">
+            <label for="memText">Tell a story about <b class="pname"></b></label>
+            <textarea id="memText" rows="3" maxlength="4000" placeholder="She sang boleros while the masa rested. Every December the whole street smelled of tamales…" required></textarea>
+            <div class="composer-foot">
+              <span class="muted small"><span id="memCount">0</span> / 4000</span>
               <span id="recStatus" class="muted small" aria-live="polite"></span>
+              <span class="spacer"></span>
+              <button type="button" id="recBtn" class="btn ghost sm" hidden><svg class="ic"><use href="#i-mic"/></svg><span>Record a story</span></button>
+              <button class="btn primary"><svg class="ic"><use href="#i-check"/></svg>Keep this memory</button>
             </div>
           </form>
           <ul id="memList" class="memlist"></ul>
         </section>
 
         <!-- Talk -->
-        <section class="card tab" id="tab-talk" hidden>
-          <div class="notice">An echo made only from what you wrote, not <span class="pname"></span>. It will say so when it doesn't know.</div>
-          <div class="row between">
-            <label class="inline">Voice of the echo
-              <select id="mode">
-                <option value="echo">Echo (first person)</option>
-                <option value="keeper">Memory keeper (third person)</option>
-              </select>
-            </label>
-            <button id="clearChat" class="ghostbtn">Clear conversation</button>
+        <section class="panel glass chatpanel" id="tab-talk" role="tabpanel" aria-labelledby="t-talk" hidden>
+          <div class="chat-head">
+            <div class="notice"><svg class="ic"><use href="#i-shield"/></svg><span>An echo made only from what you wrote, not <b class="pname"></b>. It will say so when it doesn't know.</span></div>
+            <div class="chat-tools">
+              <div class="seg" role="radiogroup" aria-label="Voice of the echo">
+                <button type="button" role="radio" data-mode="echo" aria-checked="true" title="First person, like an echo of them">Echo</button>
+                <button type="button" role="radio" data-mode="keeper" aria-checked="false" title="Third person, a gentle keeper of their memories">Keeper</button>
+              </div>
+              <button id="clearChat" class="btn ghost sm" type="button"><svg class="ic"><use href="#i-eraser"/></svg><span class="hide-sm">Clear</span></button>
+            </div>
           </div>
           <div id="chat" class="chat" aria-live="polite"></div>
-          <form id="chatForm" class="row">
-            <input id="chatInput" autocomplete="off" maxlength="2000" placeholder="Ask about a story, a song, a recipe…" required>
-            <button class="primary" id="sendBtn">Send</button>
-            <button type="button" id="stopBtn" class="ghostbtn" hidden>Stop</button>
+          <div id="suggest" class="suggest" aria-label="Suggested questions"></div>
+          <form id="chatForm" class="chatbar">
+            <input id="chatInput" autocomplete="off" maxlength="2000" placeholder="Ask about a story, a song, a recipe…" aria-label="Message" required>
+            <button class="send" id="sendBtn" aria-label="Send"><svg class="ic"><use href="#i-send"/></svg></button>
+            <button type="button" id="stopBtn" class="send stop" aria-label="Stop" hidden><svg class="ic"><use href="#i-stop"/></svg></button>
           </form>
         </section>
 
         <!-- Letter -->
-        <section class="card tab" id="tab-letter" hidden>
-          <div class="row">
-            <label class="inline">Form
-              <select id="style">
-                <option value="letter">Letter for the altar</option>
-                <option value="calaverita">Calaverita (playful verse)</option>
-              </select>
-            </label>
-            <label class="inline">Language
-              <select id="lang"><option value="en">English</option><option value="es">Español</option></select>
-            </label>
-            <button id="writeBtn" class="primary">✍ Write it</button>
+        <section class="panel" id="tab-letter" role="tabpanel" aria-labelledby="t-letter" hidden>
+          <div class="glass letter-controls">
+            <div class="field">
+              <span class="label">Form</span>
+              <div class="seg" id="styleSeg" role="radiogroup" aria-label="Form">
+                <button type="button" role="radio" data-v="letter" aria-checked="true">Letter</button>
+                <button type="button" role="radio" data-v="calaverita" aria-checked="false">Calaverita</button>
+              </div>
+            </div>
+            <div class="field">
+              <span class="label">Language</span>
+              <div class="seg" id="langSeg" role="radiogroup" aria-label="Language">
+                <button type="button" role="radio" data-v="en" aria-checked="true">English</button>
+                <button type="button" role="radio" data-v="es" aria-checked="false">Español</button>
+              </div>
+            </div>
+            <span class="spacer"></span>
+            <button id="writeBtn" class="btn primary"><svg class="ic"><use href="#i-sparkles"/></svg>Write it</button>
           </div>
-          <article id="letterOut" class="letter" hidden></article>
+          <p class="muted small letter-note">Letters and poems are creative. Read them over before reading them aloud.</p>
+          <article id="letterOut" class="paper" hidden></article>
           <div class="row" id="letterActions" hidden>
-            <button id="speakLetter" class="ghostbtn">🔊 Read aloud</button>
-            <button id="keepLetter" class="ghostbtn">Keep as a memory</button>
-            <button id="copyLetter" class="ghostbtn">Copy</button>
+            <button id="speakLetter" class="btn ghost sm"><svg class="ic"><use href="#i-volume"/></svg>Read aloud</button>
+            <button id="keepLetter" class="btn ghost sm"><svg class="ic"><use href="#i-check"/></svg>Keep as a memory</button>
+            <button id="copyLetter" class="btn ghost sm"><svg class="ic"><use href="#i-copy"/></svg>Copy</button>
+            <button id="printLetter" class="btn ghost sm"><svg class="ic"><use href="#i-print"/></svg>Print</button>
           </div>
         </section>
       </div>
     </section>
   </main>
 
-  <dialog id="personDlg">
+  <!-- add / edit person -->
+  <dialog id="personDlg" class="dlg">
     <form id="personForm" method="dialog">
-      <h2 id="dlgTitle">Light a candle</h2>
-      <label>Name <input name="name" required maxlength="80" placeholder="Abuela Rosa"></label>
-      <label>Who were they to you? <input name="relation" maxlength="60" placeholder="grandmother"></label>
+      <div class="dlg-head">
+        <h2 id="dlgTitle">Light a candle</h2>
+        <button type="button" class="icon-btn" id="dlgClose" aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>
+      </div>
+      <div class="photo-pick">
+        <button type="button" id="photoBtn" class="photo-btn" aria-label="Choose a photo">
+          <img id="photoPreview" alt="" hidden>
+          <span id="photoHint"><svg class="ic lg"><use href="#i-image"/></svg><small>Add a photo</small></span>
+        </button>
+        <input type="file" id="photoIn" accept="image/*" hidden>
+        <p class="muted small">Stays on your machine. Resized in your browser.</p>
+      </div>
+      <div class="grid2">
+        <label>Name <input name="name" required maxlength="80" placeholder="Abuela Rosa"></label>
+        <label>Who were they to you? <input name="relation" maxlength="60" placeholder="grandmother"></label>
+      </div>
       <label>Years <input name="years" maxlength="30" placeholder="1941 – 2019"></label>
-      <label>Favorite foods <small>(comma separated)</small> <input name="foods" placeholder="tamales, atole, pan dulce"></label>
-      <label>Favorite songs <small>(comma separated)</small> <input name="songs" placeholder="Cielito Lindo, Sabor a mí"></label>
-      <label>Photo <small>(stays on your machine)</small> <input type="file" id="photoIn" accept="image/*"></label>
-      <div class="row end">
-        <button type="button" id="dlgCancel" class="ghostbtn">Cancel</button>
-        <button type="button" id="dlgDelete" class="ghostbtn danger" hidden>Remove</button>
-        <button class="primary" id="dlgSave">Save</button>
+      <label>Favorite foods <small>comma separated</small> <input name="foods" placeholder="tamales, atole, pan dulce"></label>
+      <label>Favorite songs <small>comma separated</small> <input name="songs" placeholder="Cielito Lindo, Sabor a mí"></label>
+      <div class="dlg-foot">
+        <button type="button" id="dlgDelete" class="btn ghost danger" hidden><svg class="ic"><use href="#i-trash"/></svg>Remove</button>
+        <span class="spacer"></span>
+        <button type="button" id="dlgCancel" class="btn ghost">Cancel</button>
+        <button class="btn primary" id="dlgSave">Save</button>
       </div>
     </form>
   </dialog>
 
+  <!-- generic confirm (replaces window.confirm / prompt) -->
+  <dialog id="confirmDlg" class="dlg small">
+    <form method="dialog" id="confirmForm">
+      <h2 id="cTitle">Are you sure?</h2>
+      <p id="cBody" class="muted"></p>
+      <label id="cTypeWrap" hidden>Type <b id="cTypeWord">DELETE</b> to confirm <input id="cType" autocomplete="off"></label>
+      <div class="dlg-foot">
+        <span class="spacer"></span>
+        <button type="button" id="cCancel" class="btn ghost">Cancel</button>
+        <button class="btn primary" id="cOk">Confirm</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+
   <footer class="foot">
-    <span>Open weights. Open source. Your stories stay yours.</span>
-    <span class="muted">Made for the “Ghost in the Machine” challenge · 🌼 Día de los Muertos</span>
+    <span>Open weights · Open source · Your stories stay yours</span>
+    <span>Made for “Ghost in the Machine” · 🌼 Día de los Muertos</span>
   </footer>
 
   <script type="module" src="/app.js"></script>

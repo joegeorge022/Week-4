@@ -67,6 +67,7 @@ export function createGate({ sources, lang = 'en' }) {
   let evidence = null;
   let source = null;
   let held = '';
+  let started = false;
 
   const refuse = () => {
     state = 'refuse';
@@ -89,7 +90,14 @@ export function createGate({ sources, lang = 'en' }) {
      * When state becomes 'verify' the caller must run the relevance check and call resolve().
      */
     feed(chunk) {
-      if (state === 'pass') return chunk;
+      if (state === 'pass') {
+        // the first visible chunk after verification must not start with the space that follows "REPLY:"
+        if (!started) {
+          chunk = chunk.trimStart();
+          if (chunk) started = true;
+        }
+        return chunk;
+      }
       if (state === 'refuse') return '';
       if (state === 'verify') {
         held += chunk;
@@ -111,6 +119,7 @@ export function createGate({ sources, lang = 'en' }) {
       if (!relevant) return refuse();
       state = 'pass';
       const out = held.trimStart(); // models often emit the space after "REPLY:" as its own later token
+      if (out) started = true;
       held = '';
       return out;
     },

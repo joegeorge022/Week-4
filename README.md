@@ -8,7 +8,7 @@ The ghost is built around one rule: **it may not invent a memory.** Prompting al
 
 ![Asking the ghost something it doesn't know, then something it does](docs/chat.png)
 
-*Left to right in that screenshot: a question the memories can't answer gets a plain refusal; a question they can answer gets a grounded reply. Both ran on a laptop.*
+*Top to bottom: a question the memories can't answer ("What was your favorite color?") gets a plain refusal; a question they can answer gets a grounded reply. Both ran on a laptop with `gemma3:4b`.*
 
 ## Run it (offline-capable)
 
@@ -20,13 +20,15 @@ ollama pull gemma3:4b          # ~3.3 GB. gemma3:1b is faster but much less accu
 
 # 2. the app
 npm install
+cp .env.example .env           # optional keys live here; none are required
+npm run doctor                 # checks Ollama + any keys you added, tells you what to fix
 npm start                      # http://127.0.0.1:3000
 ```
 
 After the one-time model download, turn Wi-Fi off. Everything keeps working: no CDN, no web fonts, no analytics, and the server binds to loopback only.
 
 ```bash
-npm test                       # 24 unit tests: retrieval, gate, storage, prompts, security
+npm test                       # 25 unit tests: retrieval, gate, storage, prompts, security
 npm run eval                   # honesty/recall eval against the REAL local model (~2 min)
 OFRENDA_MODEL=gemma3:1b npm run eval -- --repeat 3   # swap the model, same harness
 ```
@@ -89,7 +91,7 @@ What went wrong along the way (the eval and unit tests now guard each of these):
 
 ## Optional partner integrations (all off by default)
 
-Copy `.env.example` to `.env` and fill in only what you want.
+Copy `.env.example` to `.env` and fill in only what you want, then run `npm run doctor`. Step-by-step key instructions are in [SETUP.md](SETUP.md).
 
 | Env var | Partner | What it adds | What leaves your machine | Verified? |
 |---|---|---|---|---|
@@ -104,7 +106,7 @@ Partners I looked at and left out (Temporal, Auth0, Tiger Data, etc.) would not 
 
 ### Deploying (optional, and not the point)
 
-The point of Ofrenda is that you don't have to. For a shared family altar, set `OFRENDA_PIN` (signed cookie, rate-limited login) and see `render.yaml`. CPU inference on Render is slow; use `gemma3:1b`, or point `OLLAMA_BASE_URL` at a GPU host. The `Dockerfile`s are untested.
+The point of Ofrenda is that you don't have to. For a shared family altar, set `OFRENDA_PIN` (signed cookie, rate-limited login) and see `render.yaml` and the step-by-step guide in [SETUP.md](SETUP.md#part-3-deploy-to-render-optional). CPU inference on Render is slow; use `gemma3:1b`, or point `OLLAMA_BASE_URL` at a GPU host. The `Dockerfile`s are untested.
 
 ## Privacy & safety choices
 

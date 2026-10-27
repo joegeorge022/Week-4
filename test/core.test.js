@@ -220,3 +220,12 @@ test('gate holds reply text until the relevance check resolves, then releases it
   assert.equal(g.resolve(true), 'I walked you to Mass every Sunday.');
   assert.equal(g.feed(' More.'), ' More.');         // then flows straight through
 });
+
+test('gate strips the space after REPLY: even when nothing was buffered during verification', () => {
+  const g = createGate({ sources, lang: 'en' });
+  g.feed('EVIDENCE: "walked to Mass"\nREPLY:');
+  assert.equal(g.resolve(true), '');               // verification finished before any reply text arrived
+  assert.equal(g.feed(' '), '');
+  assert.equal(g.feed(' I walked'), 'I walked');    // first visible chunk is trimmed
+  assert.equal(g.feed(' you.'), ' you.');           // later chunks are untouched
+});
